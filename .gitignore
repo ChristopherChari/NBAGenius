@@ -1,0 +1,2 @@
+# Ignore large SQLite file
+/Users/chrischari/NBAGenius/NBAGenius/NBAGenius/data/nba.sqlite
