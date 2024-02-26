@@ -1,74 +1,25 @@
-<!-- In player_profile.html template -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ player_name }} Profile</title>
+    <title>{{ player.FIRST_NAME }} {{ player.LAST_NAME }} Profile</title>
 </head>
 <body>
-    <h1>{{ player_name }} Profile</h1>
-    <img src="{{ player_image }}" alt="{{ player_name }}">
-    
-    <h2>Basic Information</h2>
-    <ul>
-        <li><strong>Position:</strong> {{ player_position }}</li>
-        <li><strong>Height:</strong> {{ player_height }}</li>
-        <li><strong>Weight:</strong> {{ player_weight }}</li>
-        <li><strong>Wingspan:</strong> {{ player_wingspan }}</li>
-        <li><strong>College Team:</strong> {{ player_college_team }}</li>
-    </ul>
-    
-    <h2>Regular Season Stats</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Season</th>
-                <th>Team</th>
-                <th>GP</th>
-                <th>PTS</th>
-                <th>REB</th>
-                <th>AST</th>
-                <!-- Add more columns as needed -->
-            </tr>
-        </thead>
-        <tbody>
-            {% for season_stats in regular_season_stats %}
-                <tr>
-                    <td>{{ season_stats.season }}</td>
-                    <td>{{ season_stats.team }}</td>
-                    <td>{{ season_stats.games_played }}</td>
-                    <td>{{ season_stats.points }}</td>
-                    <td>{{ season_stats.rebounds }}</td>
-                    <td>{{ season_stats.assists }}</td>
-                    <!-- Display other statistics -->
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    
-    <h2>Advanced Stats</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Season</th>
-                <th>PER</th>
-                <th>TS%</th>
-                <th>WS</th>
-                <!-- Add more columns as needed -->
-            </tr>
-        </thead>
-        <tbody>
-            {% for advanced_stats in advanced_stats %}
-                <tr>
-                    <td>{{ advanced_stats.season }}</td>
-                    <td>{{ advanced_stats.per }}</td>
-                    <td>{{ advanced_stats.ts_percentage }}</td>
-                    <td>{{ advanced_stats.win_shares }}</td>
-                    <!-- Display other advanced statistics -->
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h1>{{ player.FIRST_NAME }} {{ player.LAST_NAME }} Profile</h1>
+    <img src="https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{{ player.PERSON_ID }}.png" alt="{{ player.FIRST_NAME }} {{ player.LAST_NAME }}">
+
+    <p>ID: {{ player.PERSON_ID }}</p>
+    <p>Position: {{ player.POSITION }}</p>
+    <p>Height: {{ player.HEIGHT }}</p>
+    <p>Weight: {{ player.WEIGHT }}</p>
+    <p>Jersey Number: {{ player.JERSEY }}</p>
+    <p>College: {{ player.SCHOOL }}</p>
+    <p>Country: {{ player.COUNTRY }}</p>
+    <p>Draft Year: {{ player.DRAFT_YEAR }}</p>
+    <p>Draft Round: {{ player.DRAFT_ROUND }}</p>
+    <p>Draft Number: {{ player.DRAFT_NUMBER }}</p>
+    <p>Team: {{ player.TEAM_NAME }}</p>
 </body>
 </html>
