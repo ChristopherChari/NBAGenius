@@ -11,6 +11,7 @@ from .models import Player, CommonPlayerInfo  # Assuming you have a Player model
 import csv
 from django.shortcuts import render
 from nba_api.stats.static import players as nba_players
+from nba_api.stats.endpoints import PlayerDashboardByYearOverYear
 
 from nba_api.stats.endpoints import commonallplayers
 
@@ -47,22 +48,61 @@ def player_list(request):
     return render(request, 'player_list.html', context)
 
 
+from nba_api.stats.endpoints.playercareerstats import PlayerCareerStats
 def player_profile(request, player_id):
     try:
         # Retrieve player information from the NBA API
         player_info = commonplayerinfo.CommonPlayerInfo(player_id=player_id)
 
-        # Convert the response to dictionary format
+        # Retrieve player career stats from the NBA API
+        player_dashboard = PlayerDashboardByYearOverYear(player_id=player_id)
+
+        # Convert the responses to dictionary format
         player_info_dict = player_info.get_normalized_dict()
+        player_dashboard_dict = player_dashboard.get_normalized_dict()
 
         # Check if player data is found
         if player_info_dict and 'CommonPlayerInfo' in player_info_dict:
             # Extract player info from the response
             player_data = player_info_dict['CommonPlayerInfo'][0]
 
-            # Pass the player data to the template context
+            # Extract player headline stats
+            player_stats = None
+            if 'PlayerHeadlineStats' in player_info_dict:
+                player_stats = player_info_dict['PlayerHeadlineStats'][0]
+                # Multiply PIE by 100
+                if 'PIE' in player_stats:
+                   player_stats['PIE'] =  round(player_stats['PIE'] * 100, 1)
+
+            # Extract player dashboard stats
+            player_dashboard_data = None
+            if player_dashboard_dict and 'ByYearPlayerDashboard' in player_dashboard_dict:
+                player_dashboard_data = player_dashboard_dict['ByYearPlayerDashboard']
+
+                # Calculate Stats/GP
+                for season_stats in player_dashboard_data:
+                    if season_stats['GP'] != 0:
+                        season_stats['MIN_PER_GP'] = round(season_stats['MIN'] / season_stats['GP'],1)
+
+                        for key in season_stats:
+                                    if key in ['FG_PCT', 'FG3_PCT', 'FT_PCT']:
+                                        season_stats[key] = round(season_stats[key] *100 ,1)
+                        
+                        for key in season_stats:
+                            if key in ['FGM', 'FGA', 'FG3M', 'FG3A', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'STL', 'BLK', 'BLKA', 'PF', 'PFD', 'PTS',]:
+                                season_stats[key] = round(season_stats[key] / season_stats['GP'], 1)
+                                
+                    else:
+                        season_stats['MIN_PER_GP'] = 0
+                    
+
+                    
+
+            # Pass the player data, headline stats, and dashboard stats to the template context
             context = {
-                'player': player_data
+                'player': player_data,
+                'player_stats': player_stats,
+                'player_dashboard': player_dashboard_data
             }
             return render(request, 'player_profile.html', context)
         else:

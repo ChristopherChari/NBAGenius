@@ -5,21 +5,112 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ player.FIRST_NAME }} {{ player.LAST_NAME }} Profile</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
-    <h1>{{ player.FIRST_NAME }} {{ player.LAST_NAME }} Profile</h1>
-    <img src="https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{{ player.PERSON_ID }}.png" alt="{{ player.FIRST_NAME }} {{ player.LAST_NAME }}">
-
-    <p>ID: {{ player.PERSON_ID }}</p>
-    <p>Position: {{ player.POSITION }}</p>
-    <p>Height: {{ player.HEIGHT }}</p>
-    <p>Weight: {{ player.WEIGHT }}</p>
-    <p>Jersey Number: {{ player.JERSEY }}</p>
-    <p>College: {{ player.SCHOOL }}</p>
-    <p>Country: {{ player.COUNTRY }}</p>
-    <p>Draft Year: {{ player.DRAFT_YEAR }}</p>
-    <p>Draft Round: {{ player.DRAFT_ROUND }}</p>
-    <p>Draft Number: {{ player.DRAFT_NUMBER }}</p>
-    <p>Team: {{ player.TEAM_NAME }}</p>
-</body>
-</html>
+    <div style="display: flex;">
+        <div style="margin-right: 20px;">
+            <h1>{{ player.FIRST_NAME }} {{ player.LAST_NAME }} Profile</h1>
+            <img src="https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{{ player.PERSON_ID }}.png" alt="{{ player.FIRST_NAME }} {{ player.LAST_NAME }}">
+            <p>ID: {{ player.PERSON_ID }}</p>
+            <p>Position: {{ player.POSITION }}</p>
+            <p>Height: {{ player.HEIGHT }}</p>
+            <p>Weight: {{ player.WEIGHT }}</p>
+            <p>Jersey Number: {{ player.JERSEY }}</p>
+            <p>College: {{ player.SCHOOL }}</p>
+            <p>Country: {{ player.COUNTRY }}</p>
+            <p>Draft Year: {{ player.DRAFT_YEAR }}</p>
+            <p>Draft Round: {{ player.DRAFT_ROUND }}</p>
+            <p>Draft Number: {{ player.DRAFT_NUMBER }}</p>
+            <p>Team: {{ player.TEAM_NAME }}</p>
+        </div>
+        <div>
+            {% if player_stats %}
+            <h2>Player Stats</h2>
+            <p>Points Per Game: {{ player_stats.PTS }}</p>
+            <p>Assists Per Game: {{ player_stats.AST }}</p>
+            <p>Rebounds Per Game: {{ player_stats.REB }}</p>
+            <p>Player Efficiency: {{ player_stats.PIE }}%</p>
+            <!-- Add more stats as needed -->
+            {% else %}
+            <p>Player stats not available</p>
+            {% endif %}
+            
+            <!-- Add season-by-season stats table -->
+            <h2>Season-by-Season Stats</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Season</th>
+                        <th>Games Played</th>
+                        <th>Minutes Per Game</th>
+                        <th>Points</th>
+                        <th>Assists</th>
+                        <th>Rebounds</th>
+                        <th>Steals</th>
+                        <th>Blocks</th>
+                        <th>Turnovers</th>
+                        <th>Field Goal Percentage</th>
+                        <th>Three-Point Field Goal Percentage</th>
+                        <th>Free Throw Percentage</th>
+                        <th>Field Goals Made</th>
+                        <th>Field Goals Attempted</th>
+                        <th>Three-Point Field Goals Made</th>
+                        <th>Three-Point Field Goals Attempted</th>
+                        <th>Free Throws Made</th>
+                        <th>Free Throws Attempted</th>
+                        <th>Offensive Rebounds</th>
+                        <th>Defensive Rebounds</th>
+                        <th>Blocked Shots Against</th>
+                        <th>Personal Fouls</th>
+                        <th>Personal Fouls Drawn</th>
+                        <!-- Add more headers for other stats -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for season in player_dashboard %}
+                    <tr>
+                        <td>{{ season.GROUP_VALUE}}</td>
+                        <td>{{ season.GP }}</td>
+                        <td>{{ season.MIN_PER_GP }}</td>
+                        <td>{{ season.PTS }}</td>
+                        <td>{{ season.AST }}</td>
+                        <td>{{ season.REB }}</td>
+                        <td>{{ season.STL }}</td>
+                        <td>{{ season.BLK }}</td>
+                        <td>{{ season.TOV }}</td>
+                        <td>{{ season.FG_PCT }}%</td>
+                        <td>{{ season.FG3_PCT }}%</td>
+                        <td>{{ season.FT_PCT }}%</td>
+                        <td>{{ season.FGM }}</td>
+                        <td>{{ season.FGA }}</td>
+                        <td>{{ season.FG3M }}</td>
+                        <td>{{ season.FG3A }}</td>
+                        <td>{{ season.FTM }}</td>
+                        <td>{{ season.FTA }}</td>
+                        <td>{{ season.OREB }}</td>
+                        <td>{{ season.DREB }}</td>
+                        <td>{{ season.BLKA }}</td>
+                        <td>{{ season.PF }}</td>
+                        <td>{{ season.PFD }}</td>
+                        <!-- Add more cells for other stats -->
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
