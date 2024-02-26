@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'NBAGenius.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR /  'data' / 'nba.sqlite'
+        'NAME': BASE_DIR / 'data' / 'nba.sqlite'
     }
 }
 
