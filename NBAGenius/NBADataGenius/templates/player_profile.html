@@ -4,22 +4,25 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ player.FIRST_NAME }} {{ player.LAST_NAME }} Profile</title>
+    <title>{{ player.CommonPlayerInfo[0].FIRST_NAME }} {{ player.CommonPlayerInfo[0].LAST_NAME }} Profile</title>
 </head>
 <body>
-    <h1>{{ player.FIRST_NAME }} {{ player.LAST_NAME }} Profile</h1>
-    <img src="https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{{ player.PERSON_ID }}.png" alt="{{ player.FIRST_NAME }} {{ player.LAST_NAME }}">
-
-    <p>ID: {{ player.PERSON_ID }}</p>
-    <p>Position: {{ player.POSITION }}</p>
-    <p>Height: {{ player.HEIGHT }}</p>
-    <p>Weight: {{ player.WEIGHT }}</p>
-    <p>Jersey Number: {{ player.JERSEY }}</p>
-    <p>College: {{ player.SCHOOL }}</p>
-    <p>Country: {{ player.COUNTRY }}</p>
-    <p>Draft Year: {{ player.DRAFT_YEAR }}</p>
-    <p>Draft Round: {{ player.DRAFT_ROUND }}</p>
-    <p>Draft Number: {{ player.DRAFT_NUMBER }}</p>
-    <p>Team: {{ player.TEAM_NAME }}</p>
+    <h1>{{ player.CommonPlayerInfo[0].FIRST_NAME }} {{ player.CommonPlayerInfo[0].LAST_NAME }} Profile</h1>
+    <p>ID: {{ player.CommonPlayerInfo[0].PERSON_ID }}</p>
+    <p>Position: {{ player.CommonPlayerInfo[0].POSITION }}</p>
+    <p>Height: {{ player.CommonPlayerInfo[0].HEIGHT }}</p>
+    <p>Weight: {{ player.CommonPlayerInfo[0].WEIGHT }}</p>
+    <p>Jersey Number: {{ player.CommonPlayerInfo[0].JERSEY }}</p>
+    <p>College: {{ player.CommonPlayerInfo[0].COLLEGE }}</p>
+    <p>Country: {{ player.CommonPlayerInfo[0].COUNTRY }}</p>
+    <p>Draft Year: {{ player.CommonPlayerInfo[0].DRAFT_YEAR }}</p>
+    <p>Draft Round: {{ player.CommonPlayerInfo[0].DRAFT_ROUND }}</p>
+    <p>Draft Number: {{ player.CommonPlayerInfo[0].DRAFT_NUMBER }}</p>
+    <p>Team: {{ player.PlayerHeadlineStats[0].TEAM_NAME }}</p>
+    <h2>Player Stats</h2>
+    <p>Points Per Game: {{ player.PlayerHeadlineStats[0].PTS }}</p>
+    <p>Assists Per Game: {{ player.PlayerHeadlineStats[0].AST }}</p>
+    <p>Rebounds Per Game: {{ player.PlayerHeadlineStats[0].REB }}</p>
+    <!-- Add more stats as needed -->
 </body>
 </html>
