@@ -12,7 +12,8 @@ import csv
 from django.shortcuts import render
 from nba_api.stats.static import players as nba_players
 from nba_api.stats.endpoints import PlayerDashboardByYearOverYear
-
+from nba_api.stats.endpoints.playercareerstats import PlayerCareerStats
+from nba_api.stats.endpoints.matchupsrollup import MatchupsRollup
 from nba_api.stats.endpoints import commonallplayers
 
 
@@ -48,8 +49,7 @@ def player_list(request):
     return render(request, 'player_list.html', context)
 
 
-from nba_api.stats.endpoints.playercareerstats import PlayerCareerStats
-from nba_api.stats.endpoints.playerdashboardbyyearoveryear import PlayerDashboardByYearOverYear
+
 
 def player_profile(request, player_id):
     try:
@@ -58,12 +58,16 @@ def player_profile(request, player_id):
 
         # Retrieve player career stats from the NBA API with measure type set to 'Advanced'
         player_dashboard = PlayerDashboardByYearOverYear(player_id=player_id)
-        player_dashboard_Advanced = PlayerDashboardByYearOverYear(player_id=player_id, measure_type_detailed='Advanced')
+        player_dashboard_advanced = PlayerDashboardByYearOverYear(player_id=player_id, measure_type_detailed='Advanced')
+
+        # Retrieve matchup rollups to see the percentage of time a player guards a position
+        matchup_rollups = MatchupsRollup(def_player_id_nullable=player_id)
 
         # Convert the responses to dictionary format
         player_info_dict = player_info.get_normalized_dict()
         player_dashboard_dict = player_dashboard.get_normalized_dict()
-        player_dashboard_advanced_dict = player_dashboard_Advanced.get_normalized_dict()
+        player_dashboard_advanced_dict = player_dashboard_advanced.get_normalized_dict()
+        matchup_rollups_dict = matchup_rollups.get_normalized_dict()
 
         # Check if player data is found
         if player_info_dict and 'CommonPlayerInfo' in player_info_dict:
@@ -101,20 +105,23 @@ def player_profile(request, player_id):
 
             # Extract advanced stats
             advanced_stats = None
-            if  player_dashboard_advanced_dict and 'ByYearPlayerDashboard' in  player_dashboard_advanced_dict:
-                advanced_stats =  player_dashboard_advanced_dict['ByYearPlayerDashboard']
+            if player_dashboard_advanced_dict and 'ByYearPlayerDashboard' in player_dashboard_advanced_dict:
+                advanced_stats = player_dashboard_advanced_dict['ByYearPlayerDashboard']
 
-            # Print advanced stats to console
-            if advanced_stats:
-                print("Advanced Stats:")
-                print(advanced_stats)
+            # Extract matchup rollups data
+            matchup_rollups_data = None
+            if matchup_rollups_dict and 'MatchupsRollup' in matchup_rollups_dict:
+                matchup_rollups_data = matchup_rollups_dict['MatchupsRollup']
 
-            # Pass the player data, headline stats, dashboard stats, and advanced stats to the template context
+                print(matchup_rollups_data)
+
+            # Pass the player data, headline stats, dashboard stats, advanced stats, and matchup rollups to the template context
             context = {
                 'player': player_data,
                 'player_stats': player_stats,
                 'player_dashboard': player_dashboard_data,
-                'advanced_stats': advanced_stats
+                'advanced_stats': advanced_stats,
+                'matchup_rollups': matchup_rollups_data
             }
             return render(request, 'player_profile.html', context)
         else:

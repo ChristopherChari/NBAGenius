@@ -21,6 +21,7 @@
             background-color: #f2f2f2;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div style="display: flex;">
@@ -113,4 +114,54 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </body>
+    </body>
+    <div style="height: 300px;">
+        <canvas id="radarChart" width="50" height="50"></canvas>
+    </div>
+    
+ 
+
+            <script>
+                // Get the matchup rollups data from the template context
+                var matchupData = {{ matchup_rollups | safe }};
+
+                // Filter out the 'total' label
+                var filteredData = matchupData.filter(function(item) {
+                    return item.POSITION !== 'TOTAL';
+                });
+
+                // Extract labels (positions) and data (percentages of time)
+                var labels = filteredData.map(function(item) {
+                    return item.POSITION;
+                });
+                var data = filteredData.map(function(item) {
+                    return item.PERCENT_OF_TIME*100;
+                });
+
+                // Radar chart configuration
+                var ctx = document.getElementById('radarChart').getContext('2d');
+                var radarChart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '{{ player.FIRST_NAME }} {{ player.LAST_NAME }} Defensive Matchups',
+                            data: data,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)', // Adjust color as needed
+                            borderColor: 'rgba(255, 99, 132, 1)', // Adjust color as needed
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        scale: {
+                            ticks: {
+                                beginAtZero: true,
+                                max: 1 // Adjust the maximum scale value if needed
+                            }
+                        }
+                    }
+                });
+            </script>
+    </body>
         </div>
