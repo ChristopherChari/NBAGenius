@@ -88,7 +88,7 @@
                     <tr>
                         <td>{{ season.GROUP_VALUE}}</td>
                         <td>{{ season.GP }}</td>
-                        <td>{{ season.MIN_PER_GP }}</td>
+                        <td>{{ season.MIN }}</td>
                         <td>{{ season.PTS }}</td>
                         <td>{{ season.AST }}</td>
                         <td>{{ season.REB }}</td>
@@ -146,7 +146,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: '{{ player.FIRST_NAME }} {{ player.LAST_NAME }} Defensive Matchups',
+                            label: '{{ player.FIRST_NAME }} {{ player.LAST_NAME }} Defensive Matchups %',
                             data: data,
                             backgroundColor: 'rgba(255, 99, 132, 0.2)', // Adjust color as needed
                             borderColor: 'rgba(255, 99, 132, 1)', // Adjust color as needed

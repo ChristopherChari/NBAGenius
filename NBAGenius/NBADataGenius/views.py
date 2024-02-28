@@ -57,7 +57,7 @@ def player_profile(request, player_id):
         player_info = commonplayerinfo.CommonPlayerInfo(player_id=player_id)
 
         # Retrieve player career stats from the NBA API with measure type set to 'Advanced'
-        player_dashboard = PlayerDashboardByYearOverYear(player_id=player_id)
+        player_dashboard = PlayerDashboardByYearOverYear(per_mode_detailed='PerGame', player_id=player_id)
         player_dashboard_advanced = PlayerDashboardByYearOverYear(player_id=player_id, measure_type_detailed='Advanced')
 
         # Retrieve matchup rollups to see the percentage of time a player guards a position
@@ -87,21 +87,12 @@ def player_profile(request, player_id):
             if player_dashboard_dict and 'ByYearPlayerDashboard' in player_dashboard_dict:
                 player_dashboard_data = player_dashboard_dict['ByYearPlayerDashboard']
 
-                # Calculate Stats/GP
+                # Turn into percentage
                 for season_stats in player_dashboard_data:
-                    if season_stats['GP'] != 0:
-                        season_stats['MIN_PER_GP'] = round(season_stats['MIN'] / season_stats['GP'], 1)
 
                         for key in season_stats:
                             if key in ['FG_PCT', 'FG3_PCT', 'FT_PCT']:
                                 season_stats[key] = round(season_stats[key] * 100, 1)
-
-                        for key in season_stats:
-                            if key in ['FGM', 'FGA', 'FG3M', 'FG3A', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST',
-                                       'TOV', 'STL', 'BLK', 'BLKA', 'PF', 'PFD', 'PTS']:
-                                season_stats[key] = round(season_stats[key] / season_stats['GP'], 1)
-                    else:
-                        season_stats['MIN_PER_GP'] = 0
 
             # Extract advanced stats
             advanced_stats = None
@@ -113,7 +104,7 @@ def player_profile(request, player_id):
             if matchup_rollups_dict and 'MatchupsRollup' in matchup_rollups_dict:
                 matchup_rollups_data = matchup_rollups_dict['MatchupsRollup']
 
-                print(matchup_rollups_data)
+                
 
             # Pass the player data, headline stats, dashboard stats, advanced stats, and matchup rollups to the template context
             context = {
