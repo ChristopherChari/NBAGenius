@@ -161,11 +161,11 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: '{{ player.FIRST_NAME }} {{ player.LAST_NAME }} Defensive Matchups %',
+                            label: '{{ player.FIRST_NAME }} {{ player.LAST_NAME }} DEFENSIVE MATCHUP',
                             data: data,
                             backgroundColor: 'rgba(255, 99, 132, 0.2)', // Adjust color as needed
                             borderColor: 'rgba(255, 99, 132, 1)', // Adjust color as needed
-                            borderWidth: 2
+                            borderWidth: 1
                         }]
                     },
                     options: {
@@ -199,7 +199,7 @@
                     data: {
                         labels: playtypes,
                         datasets: [{
-                            label: 'POSS_PCT',
+                            label: '{{ player.FIRST_NAME }} {{ player.LAST_NAME }}  USAGE BY PLAY-TYPE',
                             data: possPctValues,
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',  // Customize background color
                             borderColor: 'rgba(255, 99, 132, 1)',       // Customize border color
