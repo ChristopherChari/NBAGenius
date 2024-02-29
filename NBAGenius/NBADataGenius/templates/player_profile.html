@@ -147,10 +147,10 @@
                 });
 
                 // Extract labels (positions) and data (percentages of time)
-                var labels = filteredData.map(function(item) {
+                var positions = filteredData.map(function(item) {
                     return item.POSITION;
                 });
-                var data = filteredData.map(function(item) {
+                var PCT_Time = filteredData.map(function(item) {
                     return item.PERCENT_OF_TIME*100;
                 });
 
@@ -159,13 +159,13 @@
                 var radarChart = new Chart(ctx, {
                     type: 'radar',
                     data: {
-                        labels: labels,
+                        labels: positions,
                         datasets: [{
                             label: '{{ player.FIRST_NAME }} {{ player.LAST_NAME }} DEFENSIVE MATCHUP',
-                            data: data,
+                            data: PCT_Time,
                             backgroundColor: 'rgba(255, 99, 132, 0.2)', // Adjust color as needed
                             borderColor: 'rgba(255, 99, 132, 1)', // Adjust color as needed
-                            borderWidth: 1
+                            borderWidth: 5
                         }]
                     },
                     options: {
@@ -182,6 +182,8 @@
             <script>
                 // Get the synergy data from Django context
                 var synergyData = {{ synergy_data|safe }};
+
+                
 
                 // Extract playtypes and POSS_PCT values from synergy data
                 var playtypes = synergyData.map(function(item) {
@@ -203,7 +205,7 @@
                             data: possPctValues,
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',  // Customize background color
                             borderColor: 'rgba(255, 99, 132, 1)',       // Customize border color
-                            borderWidth: 1,
+                            borderWidth: 5,
                         }]
                     },
                     options: {

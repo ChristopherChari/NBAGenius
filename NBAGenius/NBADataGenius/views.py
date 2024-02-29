@@ -53,6 +53,44 @@ def player_list(request):
 
 import json
 
+def get_league_hustle_stats_player(player_id):
+    try:
+        all_data = []
+        # Retrieve hustle stats player data
+        response = endpoints.LeagueHustleStatsPlayer(
+            per_mode_time="PerGame",
+        )
+
+        # Get the JSON response
+        response_json = response.get_json()
+
+        # Convert JSON response to dictionary
+        response_dict = json.loads(response_json)
+
+        # Check if the response contains the expected structure
+        if 'resultSets' in response_dict and len(response_dict['resultSets']) > 0:
+            # Filter the response for the specified player
+            filtered_data = []
+            for row in response_dict['resultSets'][0]['rowSet']:
+                # Convert player_id to string before checking
+                if str(player_id) in str(row[0]):  # Check if player_id exists in the row
+                    filtered_data.append(row)
+
+            # Add filtered data for this player to the list of all data
+            all_data.extend(filtered_data)
+
+            if not all_data:
+                print("No data found for player ID:", player_id)
+
+        else:
+            print("Unexpected response format.")
+
+        return all_data
+
+    except Exception as e:
+        print("Error retrieving league hustle stats player data:", e)
+        return None
+
 
 def get_synergy_playtype_data(player_id):
     try:
@@ -108,6 +146,7 @@ def player_profile(request, player_id):
         # Get synergy playtype data for the specific player
         synergy_data = get_synergy_playtype_data(player_id)
 
+        hustle_data = get_league_hustle_stats_player(player_id)
 
 
         # Convert the responses to dictionary format
@@ -152,6 +191,9 @@ def player_profile(request, player_id):
                 matchup_rollups_data = matchup_rollups_dict['MatchupsRollup']
 
             
+            print(hustle_data)
+
+            
             # Pass the player data, headline stats, dashboard stats, advanced stats, and matchup rollups to the template context
             context = {
                 'player': player_data,
@@ -159,7 +201,8 @@ def player_profile(request, player_id):
                 'player_dashboard': player_dashboard_data,
                 'advanced_stats': advanced_stats,
                 'matchup_rollups': matchup_rollups_data,
-                'synergy_data': synergy_data
+                'synergy_data': synergy_data,
+                'hustle_data' : hustle_data
     
             }
             return render(request, 'player_profile.html', context)
