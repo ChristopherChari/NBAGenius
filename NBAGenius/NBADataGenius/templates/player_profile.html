@@ -20,6 +20,15 @@
         th {
             background-color: #f2f2f2;
         }
+
+        .chart-container {
+            display: flex;
+        }
+
+        .chart-container > div {
+            margin-right: 20px;
+            height: 300px;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -116,10 +125,16 @@
             </table>
         </body>
     </body>
-    <div style="height: 300px;">
-        <canvas id="radarChart" width="50" height="50"></canvas>
+    <div class="chart-container">
+        <div style="height: 300px;">
+            <!-- Defensive matchups radar chart -->
+            <canvas id="defensiveRadarChart" width="400" height="400"></canvas>
+        </div>
+        <div style="height: 300px;">
+            <!-- Synergy playtype radar chart -->
+            <canvas id="synergyRadarChart" width="400" height="400"></canvas>
+        </div>
     </div>
-    
  
 
             <script>
@@ -140,7 +155,7 @@
                 });
 
                 // Radar chart configuration
-                var ctx = document.getElementById('radarChart').getContext('2d');
+                var ctx = document.getElementById('defensiveRadarChart').getContext('2d');
                 var radarChart = new Chart(ctx, {
                     type: 'radar',
                     data: {
@@ -158,6 +173,43 @@
                             ticks: {
                                 beginAtZero: true,
                                 max: 1 // Adjust the maximum scale value if needed
+                            }
+                        }
+                    }
+                });
+            </script>
+
+            <script>
+                // Get the synergy data from Django context
+                var synergyData = {{ synergy_data|safe }};
+
+                // Extract playtypes and POSS_PCT values from synergy data
+                var playtypes = synergyData.map(function(item) {
+                    return item[6];  // Assuming playtype is at index 6
+                });
+
+                var possPctValues = synergyData.map(function(item) {
+                    return item[10]*100;  // Assuming POSS_PCT is at index 10
+                });
+
+                // Create radar chart
+                var ctx = document.getElementById('synergyRadarChart').getContext('2d');
+                var radarChart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: playtypes,
+                        datasets: [{
+                            label: 'POSS_PCT',
+                            data: possPctValues,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',  // Customize background color
+                            borderColor: 'rgba(255, 99, 132, 1)',       // Customize border color
+                            borderWidth: 1,
+                        }]
+                    },
+                    options: {
+                        scale: {
+                            ticks: {
+                                beginAtZero: true
                             }
                         }
                     }
