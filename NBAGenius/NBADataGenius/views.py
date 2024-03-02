@@ -16,15 +16,11 @@ from nba_api.stats.endpoints.playercareerstats import PlayerCareerStats
 from nba_api.stats.endpoints.matchupsrollup import MatchupsRollup
 from nba_api.stats.endpoints import commonallplayers
 from nba_api.stats import endpoints
-from nba_api.stats.endpoints import SynergyPlayTypes
+from nba_api.stats.endpoints import SynergyPlayTypes, leaguedashplayerstats
 import pandas as pd
-
+import numpy as np
 
 # Create your views here.
-
-
-
-
 def home(request):
     return render(request, "home.html")
 
@@ -53,12 +49,58 @@ def player_list(request):
 
 import json
 
-def get_league_hustle_stats_player(player_id):
+
+# Function to retrieve player stats
+def ts_stats_player_percentile(player_id):
+    try:
+        # Retrieve hustle stats player data
+        response = endpoints.LeagueDashPlayerStats(
+            per_mode_detailed="PerGame",
+            measure_type_detailed_defense="Advanced"
+        )
+
+        # Get the JSON response
+        response_json = response.get_json()
+
+        # Convert JSON response to dictionary
+        response_dict = json.loads(response_json)
+
+        # Check if the response contains the expected structure
+        if 'resultSets' in response_dict and len(response_dict['resultSets']) > 0:
+            # Extract deflections data for all players
+            trueshooting = [row[28] for row in response_dict['resultSets'][0]['rowSet']]
+
+            # Find the player's row in the response data
+            player_ts = None
+            for row in response_dict['resultSets'][0]['rowSet']:
+                if str(player_id) in str(row[0]):
+                    player_ts = row[28]
+                    break
+
+            if player_ts is not None:
+                # Calculate percentile
+                ts_sorted = sorted(trueshooting)
+                player_percentile = np.searchsorted(ts_sorted, player_ts) / len(ts_sorted)
+
+                print("Player's ts percentile:", round(player_percentile*100, 1))
+            else:
+                print("Player not found in the data.")
+
+        else:
+            print("Unexpected response format.")
+
+    except Exception as e:
+        print("Error retrieving league hustle stats player data:", e)
+
+
+
+def get_league_TS_stats_player(player_id):
     try:
         all_data = []
         # Retrieve hustle stats player data
-        response = endpoints.LeagueHustleStatsPlayer(
-            per_mode_time="PerGame",
+        response = endpoints.LeagueDashPlayerStats(
+            measure_type_detailed_defense="Advanced",
+            per_mode_detailed="PerGame"
         )
 
         # Get the JSON response
@@ -79,9 +121,6 @@ def get_league_hustle_stats_player(player_id):
             # Add filtered data for this player to the list of all data
             all_data.extend(filtered_data)
 
-            if not all_data:
-                print("No data found for player ID:", player_id)
-
         else:
             print("Unexpected response format.")
 
@@ -92,6 +131,82 @@ def get_league_hustle_stats_player(player_id):
         return None
 
 
+
+def get_league_hustle_stats_player_percentile(player_id):
+    try:
+        # Retrieve hustle stats player data
+        response = endpoints.LeagueHustleStatsPlayer(
+            per_mode_time="Per36",
+        )
+
+        # Get the JSON response
+        response_json = response.get_json()
+
+        # Convert JSON response to dictionary
+        response_dict = json.loads(response_json)
+
+        # Check if the response contains the expected structure
+        if 'resultSets' in response_dict and len(response_dict['resultSets']) > 0:
+            # Extract deflections data for all players
+            deflections = [row[10] for row in response_dict['resultSets'][0]['rowSet']]
+
+            # Find the player's row in the response data
+            player_deflections = None
+            for row in response_dict['resultSets'][0]['rowSet']:
+                if str(player_id) in str(row[0]):
+                    player_deflections = row[10]
+                    break
+
+            if player_deflections is not None:
+                # Calculate percentile
+                deflections_sorted = sorted(deflections)
+                player_percentile = np.searchsorted(deflections_sorted, player_deflections) / len(deflections_sorted)
+
+                print("Player's deflections percentile:", round(player_percentile*100, 1))
+            else:
+                print("Player not found in the data.")
+
+        else:
+            print("Unexpected response format.")
+
+    except Exception as e:
+        print("Error retrieving league hustle stats player data:", e)
+
+def get_league_hustle_stats_player(player_id):
+    try:
+        all_data = []
+        # Retrieve hustle stats player data
+        response = endpoints.LeagueHustleStatsPlayer(
+            per_mode_time="PerGame",
+        )
+
+        # Get the JSON response
+        response_json = response.get_json()
+
+        # Convert JSON response to dictionary
+        response_dict = json.loads(response_json)
+
+        # Check if the response contains the expected structure
+        if 'resultSets' in response_dict and len(response_dict['resultSets']) > 0:
+            # Filter the response for the specified player
+            filtered_data = []
+            for row in response_dict['resultSets'][0]['rowSet']:
+                # Convert player_id to string before checking
+                if str(player_id) in str(row[0]) and str(row[6]) > 20:  # Check if player_id exists in the row
+                    filtered_data.append(row)
+
+            # Add filtered data for this player to the list of all data
+            all_data.extend(filtered_data)
+
+        else:
+            print("Unexpected response format.")
+
+        return all_data
+
+    except Exception as e:
+        print("Error retrieving league hustle stats player data:", e)
+        return None
+    
 def get_synergy_playtype_data(player_id):
     try:
         play_types = ['Transition', 'Isolation', 'PRBallHandler', 'PRRollman', 'Postup', 'Spotup', 'Handoff', 'Cut', 'OffScreen', 'OffRebound', 'Misc']
@@ -147,6 +262,10 @@ def player_profile(request, player_id):
         synergy_data = get_synergy_playtype_data(player_id)
 
         hustle_data = get_league_hustle_stats_player(player_id)
+        hustle_percentile_data = get_league_hustle_stats_player_percentile(player_id)
+        ts_data = get_league_TS_stats_player(player_id)
+        tss_data = ts_stats_player_percentile(player_id)
+
 
 
         # Convert the responses to dictionary format
@@ -189,10 +308,6 @@ def player_profile(request, player_id):
             matchup_rollups_data = None
             if matchup_rollups_dict and 'MatchupsRollup' in matchup_rollups_dict:
                 matchup_rollups_data = matchup_rollups_dict['MatchupsRollup']
-
-            
-            print(hustle_data)
-
             
             # Pass the player data, headline stats, dashboard stats, advanced stats, and matchup rollups to the template context
             context = {
