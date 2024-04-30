@@ -116,7 +116,106 @@ def calculate_player_rates_percentile(player_id):
         print("Error calculating player rates percentile:", e)
         return None
 
+def calculate_player_efficiency(player_id):
+    try:
+        # Fetch data from the LeagueDashPtStats endpoint
+        player_stats = LeagueDashPtStats(
+            per_mode_simple='PerGame',
+            player_or_team='Player',
+            pt_measure_type='Efficiency'
+        )
+        player_stats_data = player_stats.get_normalized_dict()['LeagueDashPtStats']
+
+        # Initialize variables to store drive points, shoot points, and pull-up points for the selected player
+        drive_points = None
+        shoot_points = None
+        pull_up_points = None
+
+        # Iterate over player stats data
+        for player_stat in player_stats_data:
+            if player_stat['PLAYER_ID'] == player_id:
+                # Check if the keys exist before accessing them
+                if 'DRIVE_PTS' in player_stat:
+                    drive_points = player_stat['DRIVE_PTS']
+                if 'CATCH_SHOOT_PTS' in player_stat:
+                    shoot_points = player_stat['CATCH_SHOOT_PTS']
+                if 'PULL_UP_PTS' in player_stat:
+                    pull_up_points = player_stat['PULL_UP_PTS']
+                break
+
+        # Print the points
+        print("Drive Points :", drive_points)
+        print("Shoot points :", shoot_points)
+        print("Pull-up points :", pull_up_points)
+
+        # Return the points
+        return {
+            'Drive_points': drive_points,
+            'Shoot_points': shoot_points,
+            'Pull_up_points': pull_up_points
+        }
+    
+    except Exception as e:
+        print("Error calculating player efficiency percentiles:", e)
+        return None
+
+def calculate_player_efficiency_percentile(player_id):
+    try:
+        # Fetch data from the LeagueDashPtStats endpoint
+        player_stats = LeagueDashPtStats(
+            per_mode_simple='PerGame',
+            player_or_team='Player',
+            pt_measure_type='Efficiency'
+        )
+        player_stats_data = player_stats.get_normalized_dict()['LeagueDashPtStats']
+
+        # Initialize lists to store drive points, catch and shoot points, and pull-up points for all players
+        drivepts_list = []
+        cnspts_list = []
+        pullupspts_list = []
+
+        # Iterate over player stats data
+        for player_stat in player_stats_data:
+            drive_points = player_stat['DRIVE_PTS']
+            catchandshoot_points = player_stat['CATCH_SHOOT_PTS']
+            pullup_points = player_stat['PULL_UP_PTS']
+        
+            # Add points to lists if they are not None
+            if drive_points is not None and catchandshoot_points is not None and pullup_points is not None:
+                drivepts_list.append(drive_points)
+                cnspts_list.append(catchandshoot_points)
+                pullupspts_list.append(pullup_points)
+
+        # Call calculate_player_efficiency to get the points for the specified player
+        player_efficiency = calculate_player_efficiency(player_id)
+        if player_efficiency:
+            pdrivepts = player_efficiency['Drive_points']
+            cnspts = player_efficiency['Shoot_points']
+            ppulluppts = player_efficiency['Pull_up_points']
+
+            # Calculate percentiles for drive points, catch and shoot points, and pull-up points
+            drive_percentile = round((np.searchsorted(sorted(drivepts_list), pdrivepts) / len(drivepts_list)) * 100, 1)
+            cns_percentile = round((np.searchsorted(sorted(cnspts_list), cnspts) / len(cnspts_list)) * 100, 1)
+            pullup_percentile = round((np.searchsorted(sorted(pullupspts_list), ppulluppts) / len(pullupspts_list)) * 100, 1)
+
+            print("Player's Drive Percentile: ", drive_percentile)
+            print("Player's Catch and Shoot Percentile: ", cns_percentile)
+            print("Player's Pull Up Percentile: ", pullup_percentile)
+
+            return {
+                'drive_percentile': drive_percentile, 
+                'CNS_percentile': cns_percentile, 
+                'Pull_Up_Percentile': pullup_percentile
+            }
+        else:
+            print("Error: Player efficiency data not found.")
+            return None
+    except Exception as e:
+        print("Error calculating player efficiency percentiles:", e)
+        return None
+
 def get_league_stats_player(player_id):
+
     try:
         all_data = []
         # Retrieve hustle stats player data
@@ -151,10 +250,9 @@ def get_league_stats_player(player_id):
         print("Error retrieving league hustle stats player data:", e)
         return None
 
-# Function to retrieve player stats
 def advanced_stats_player_percentile(player_id):
     try:
-        # Retrieve hustle stats player data
+        # Retrieve advanced stats player data
         response = endpoints.LeagueDashPlayerStats(
             per_mode_detailed="PerGame",
             measure_type_detailed_defense="Advanced"
@@ -166,26 +264,30 @@ def advanced_stats_player_percentile(player_id):
         # Convert JSON response to dictionary
         response_dict = json.loads(response_json)
 
-        
-
         # Check if the response contains the expected structure
         if 'resultSets' in response_dict and len(response_dict['resultSets']) > 0:
-            # Extract deflections data for all players
-            trueshooting = [row[28] for row in response_dict['resultSets'][0]['rowSet']]
+            # Extract true shooting percentage (TS%) and assist percentage (AST%) data for all players
+            true_shooting = [row[28] for row in response_dict['resultSets'][0]['rowSet']]
+            assist_percentage = [row[19] for row in response_dict['resultSets'][0]['rowSet']]
 
             # Find the player's row in the response data
             player_ts = None
+            player_ast = None
             for row in response_dict['resultSets'][0]['rowSet']:
                 if str(player_id) in str(row[0]):
-                    player_ts = row[28]
+                    player_ts = row[28]  # True Shooting Percentage (TS%)
+                    player_ast = row[19]  # Assist Percentage (AST%)
                     break
 
-            if player_ts is not None:
-                # Calculate percentile
-                ts_sorted = sorted(trueshooting)
-                player_percentile = np.searchsorted(ts_sorted, player_ts) / len(ts_sorted)
+            if player_ts is not None and player_ast is not None:
+                # Calculate percentiles for TS% and AST%
+                ts_sorted = sorted(true_shooting)
+                ast_sorted = sorted(assist_percentage)
+                ts_percentile = np.searchsorted(ts_sorted, player_ts) / len(ts_sorted)
+                ast_percentile = np.searchsorted(ast_sorted, player_ast) / len(ast_sorted)
 
-                print("Player's ts percentile:", round(player_percentile*100, 1))
+                print("Player's TS% percentile:", round(ts_percentile * 100, 1))
+                print("Player's AST% percentile:", round(ast_percentile * 100, 1))
             else:
                 print("Player not found in the data.")
 
@@ -193,7 +295,7 @@ def advanced_stats_player_percentile(player_id):
             print("Unexpected response format.")
 
     except Exception as e:
-        print("Error retrieving league hustle stats player data:", e)
+        print("Error retrieving league advanced stats player data:", e)
 
 def get_league_advanced_stats_player(player_id):
     try:
@@ -367,6 +469,8 @@ def player_profile(request, player_id):
         basic_league_data = get_league_stats_player(player_id)
         player_rate_data = calculate_player_rates_percentile(player_id)
         player_rate_data = calculate_player_rates(player_id)
+        Effiency_data = calculate_player_efficiency(player_id)
+        Effiency_percentile_data = calculate_player_efficiency_percentile(player_id)
         
 
 
