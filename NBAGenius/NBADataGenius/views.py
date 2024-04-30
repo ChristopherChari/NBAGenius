@@ -8,10 +8,9 @@ from django.shortcuts import render
 from django.template import TemplateDoesNotExist
 from .models import Player  # Assuming you have a Player model defined
 from .models import Player, CommonPlayerInfo  # Assuming you have a Player model defined
-import csv
 from django.shortcuts import render
 from nba_api.stats.static import players as nba_players
-from nba_api.stats.endpoints import PlayerDashboardByYearOverYear
+from nba_api.stats.endpoints import PlayerDashboardByYearOverYear, LeagueDashPlayerStats, LeagueDashPtStats
 from nba_api.stats.endpoints.playercareerstats import PlayerCareerStats
 from nba_api.stats.endpoints.matchupsrollup import MatchupsRollup
 from nba_api.stats.endpoints import commonallplayers
@@ -19,12 +18,11 @@ from nba_api.stats import endpoints
 from nba_api.stats.endpoints import SynergyPlayTypes, leaguedashplayerstats
 import pandas as pd
 import numpy as np
+import json
 
-# Create your views here.
+
 def home(request):
     return render(request, "home.html")
-
-
 
 def player_list(request):
     # Retrieve all NBA players using nba_api
@@ -47,11 +45,114 @@ def player_list(request):
 
     return render(request, 'player_list.html', context)
 
-import json
+def calculate_player_rates(player_id):
+    # Fetch data from the LeagueDashPlayerStats endpoint
+    player_stats = LeagueDashPlayerStats(
+        measure_type_detailed_defense='Base'
+    )
+    player_stats_data = player_stats.get_normalized_dict()['LeagueDashPlayerStats']
+    
+    # Search for the specific player by their ID
+    for player_stat in player_stats_data:
+        if player_stat['PLAYER_ID'] == player_id:
+            # Calculate free throw rate (FTAR) and three-point rate (3PAR) for the player
+            fta = player_stat['FTA']
+            fga = player_stat['FGA']
+            fg3a = player_stat['FG3A']
+            
+            # Avoid division by zero
+            if fga != 0:
+                pftar = round((fta / fga) * 100, 1)
+            else:
+                pftar = None
+            
+            # Avoid division by zero
+            if fga != 0:
+                threepar = round((fg3a / fga) * 100, 1)
+            else:
+                threepar = None
+            
+            return {'FTAR': pftar, '3PAR': threepar}
+    
+    # Return None if the player ID is not found
+    return None
 
+def calculate_player_rates_percentile(player_id):
+    try:
+        # Fetch data from the LeagueDashPlayerStats endpoint
+        player_stats = LeagueDashPlayerStats(measure_type_detailed_defense='Base')
+        player_stats_data = player_stats.get_normalized_dict()['LeagueDashPlayerStats']
+
+        # Initialize lists to store FTAR and 3PAR for all players
+        ftar_list = []
+        par_list = []
+
+        # Iterate over player stats data
+        for player_stat in player_stats_data:
+            fta = player_stat['FTA']
+            fga = player_stat['FGA']
+            fg3a = player_stat['FG3A']
+
+            # Avoid division by zero
+            if fga != 0:
+                ftar = (fta / fga) * 100
+                par = (fg3a / fga) * 100
+                ftar_list.append(ftar)
+                par_list.append(par)
+
+        # Calculate percentiles for FTAR and 3PAR
+        pftar = calculate_player_rates(player_id)['FTAR']
+        threepar = calculate_player_rates(player_id)['3PAR']
+
+        ftar_percentile = round( (np.searchsorted(sorted(ftar_list), pftar) / len(ftar_list)) * 100, 1)
+        par_percentile = round( (np.searchsorted(sorted(par_list), threepar) / len(par_list)) *100, 1)
+
+        print("players free throw rate: ", pftar, " & ", ftar_percentile)
+        print("players 3 point rate: ", threepar, " & ", par_percentile)
+
+        return {'FTAR_percentile': ftar_percentile, '3PAR_percentile': par_percentile}
+    
+    except Exception as e:
+        print("Error calculating player rates percentile:", e)
+        return None
+
+def get_league_stats_player(player_id):
+    try:
+        all_data = []
+        # Retrieve hustle stats player data
+        response = endpoints.LeagueDashPlayerStats(
+            per_mode_detailed="PerGame"
+        )
+
+        # Get the JSON response
+        response_json = response.get_json()
+
+        # Convert JSON response to dictionary
+        response_dict = json.loads(response_json)
+
+        # Check if the response contains the expected structure
+        if 'resultSets' in response_dict and len(response_dict['resultSets']) > 0:
+            # Filter the response for the specified player
+            filtered_data = []
+            for row in response_dict['resultSets'][0]['rowSet']:
+                # Convert player_id to string before checking
+                if str(player_id) in str(row[0]):  # Check if player_id exists in the row
+                    filtered_data.append(row)
+
+            # Add filtered data for this player to the list of all data
+            all_data.extend(filtered_data)
+
+        else:
+            print("Unexpected response format.")
+
+        return all_data
+
+    except Exception as e:
+        print("Error retrieving league hustle stats player data:", e)
+        return None
 
 # Function to retrieve player stats
-def ts_stats_player_percentile(player_id):
+def advanced_stats_player_percentile(player_id):
     try:
         # Retrieve hustle stats player data
         response = endpoints.LeagueDashPlayerStats(
@@ -64,6 +165,8 @@ def ts_stats_player_percentile(player_id):
 
         # Convert JSON response to dictionary
         response_dict = json.loads(response_json)
+
+        
 
         # Check if the response contains the expected structure
         if 'resultSets' in response_dict and len(response_dict['resultSets']) > 0:
@@ -92,9 +195,7 @@ def ts_stats_player_percentile(player_id):
     except Exception as e:
         print("Error retrieving league hustle stats player data:", e)
 
-
-
-def get_league_TS_stats_player(player_id):
+def get_league_advanced_stats_player(player_id):
     try:
         all_data = []
         # Retrieve hustle stats player data
@@ -129,8 +230,6 @@ def get_league_TS_stats_player(player_id):
     except Exception as e:
         print("Error retrieving league hustle stats player data:", e)
         return None
-
-
 
 def get_league_hustle_stats_player_percentile(player_id):
     try:
@@ -192,7 +291,7 @@ def get_league_hustle_stats_player(player_id):
             filtered_data = []
             for row in response_dict['resultSets'][0]['rowSet']:
                 # Convert player_id to string before checking
-                if str(player_id) in str(row[0]) and str(row[6]) > 20:  # Check if player_id exists in the row
+                if str(player_id) in str(row[0]):  # Check if player_id exists in the row
                     filtered_data.append(row)
 
             # Add filtered data for this player to the list of all data
@@ -263,8 +362,12 @@ def player_profile(request, player_id):
 
         hustle_data = get_league_hustle_stats_player(player_id)
         hustle_percentile_data = get_league_hustle_stats_player_percentile(player_id)
-        ts_data = get_league_TS_stats_player(player_id)
-        tss_data = ts_stats_player_percentile(player_id)
+        advanced_league_data = get_league_advanced_stats_player(player_id)
+        advanced_percentile_data = advanced_stats_player_percentile(player_id)
+        basic_league_data = get_league_stats_player(player_id)
+        player_rate_data = calculate_player_rates_percentile(player_id)
+        player_rate_data = calculate_player_rates(player_id)
+        
 
 
 
