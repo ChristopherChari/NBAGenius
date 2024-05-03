@@ -182,18 +182,21 @@
             <script>
                 // Get the synergy data from Django context
                 var synergyData = {{ synergy_data|safe }};
-
-                
-
+            
+                console.log('Synergy Data:', synergyData);  // Debugging to check data loaded
+            
                 // Extract playtypes and POSS_PCT values from synergy data
                 var playtypes = synergyData.map(function(item) {
-                    return item[6];  // Assuming playtype is at index 6
+                    return item.play_type;  // Access by property if it's an object
                 });
-
+            
                 var possPctValues = synergyData.map(function(item) {
-                    return item[10]*100;  // Assuming POSS_PCT is at index 10
+                    return item.POSS_PCT * 100;  // Access by property and convert to percentage
                 });
-
+            
+                console.log('Playtypes:', playtypes);  // Debugging to check extracted playtypes
+                console.log('Possession Percentages:', possPctValues);  // Debugging to check percentages
+            
                 // Create radar chart
                 var ctx = document.getElementById('synergyRadarChart').getContext('2d');
                 var radarChart = new Chart(ctx, {
@@ -201,10 +204,10 @@
                     data: {
                         labels: playtypes,
                         datasets: [{
-                            label: '{{ player.FIRST_NAME }} {{ player.LAST_NAME }}  USAGE BY PLAY-TYPE',
+                            label: '{{ player.FIRST_NAME }} {{ player.LAST_NAME }} USAGE BY PLAY-TYPE',
                             data: possPctValues,
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',  // Customize background color
-                            borderColor: 'rgba(255, 99, 132, 1)',       // Customize border color
+                            borderColor: 'rgba(255, 99, 132, 1)',         // Customize border color
                             borderWidth: 5,
                         }]
                     },
@@ -217,5 +220,118 @@
                     }
                 });
             </script>
+    </body>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Player Stats and Percentiles</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            table { width: 40%; border-collapse: collapse; margin-left: auto; margin-right: auto; }
+            th, td { padding: 4px; border-bottom: 1px solid #ddd; text-align: left; font-size: 0.9em; }
+            th { background-color: #f2f2f2; }
+            .bar-container { height: 15px; background-color: #e0e0e0; width: 100%; }
+            .bar { height: 100%; background-color: #76b947; }
+            .stat-col { width: 5%; } /* Restricting the width of the Stat column */
+        </style>
+    </head>
+    <body>
+        <h1>Player Statistics and Percentiles</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th class="stat-col">Stat</th>
+                    <th>Value</th>
+                    <th>Percentile</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if player_rate_data %}
+                    <tr>
+                        <td class="stat-col">FTAR</td>
+                        <td>{{ player_rate_data.FTAR }}%</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ player_rate_data.FTAR_percentile }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="stat-col">3PAR</td>
+                        <td>{{ player_rate_data.3PAR }}%</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ player_rate_data.3PAR_percentile }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+    
+                {% if efficieny_data %}
+                    <tr>
+                        <td class="stat-col">Drive PTS</td>
+                        <td>{{ efficieny_data.Drive_points }}</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ efficieny_data.Drive_percentile }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="stat-col">Catch and Shoot PTS</td>
+                        <td>{{ efficieny_data.Shoot_points }}</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ efficieny_data.CNS_percentile }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="stat-col">Pull Up PTS</td>
+                        <td>{{ efficieny_data.pull_up_points }}</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ efficieny_data.pull_up_percentile }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+    
+                {% if advanced_data %}
+                    <tr>
+                        <td class="stat-col">True Shooting %</td>
+                        <td>{{ advanced_data.player_ts }}%</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ advanced_data.ts_percentile }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="stat-col">Assist %</td>
+                        <td>{{ advanced_percentile_data.player_ast }}%</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ advanced_data.ast_percentile }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if hustle_data %}
+                    {% for key, value in hustle_data.items %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            <td>{{ value.value }}</td>
+                            <td>
+                                <div class="bar-container">
+                                    <div class="bar" style="width: {{ value.percentile }}%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
     </body>
         </div>
