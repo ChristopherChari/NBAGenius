@@ -1,5 +1,4 @@
-/* main.css - Link this file in the <head> section of your HTML */
-
+/* Main Styles */
 body {
     font-family: 'Arial', sans-serif;
     margin: 20px;
@@ -9,8 +8,10 @@ body {
 
 h1, h2 {
     color: #135D66;  /* Secondary dark color for headings */
+    margin-bottom: 0.5em;
 }
 
+/* Improved Table Styles */
 table {
     width: 80%;
     border-collapse: collapse;
@@ -30,36 +31,44 @@ th {
     color: #ffffff; /* White text in headers */
 }
 
+tr:hover {
+    background-color: #f4f4f4; /* Light grey background on hover for rows */
+}
+
+/* Bar Styles for Percentiles */
 .bar-container {
+    position: relative;
     height: 20px;
     background-color: #77B0AA; /* Light teal for background of bars */
     width: 100%;
-    border-radius: 5px; /* Optional: adds rounded corners */
+    border-radius: 5px; /* Rounded corners for bars */
 }
 
 .bar {
     height: 100%;
     background-color: #003C43; /* Dark teal for the progress bars */
-    border-radius: 5px; /* Optional: adds rounded corners */
+    transition: width 0.3s ease-in-out; /* Smooth transition for bar width changes */
 }
 
+.bar:hover {
+    opacity: 0.9; /* Slight opacity change on hover */
+}
+
+/* Flex Container for Charts */
 .chart-container {
     display: flex;
     justify-content: space-around; /* Distributes space around charts */
     padding: 10px;
+    flex-wrap: wrap; /* Allows charts to wrap in smaller screens */
 }
 
-.chart-container > div {
-    background-color: #ffffff; /* White background for charts */
-    box-shadow: 0px 4px 8px rgba(0,0,0,0.1); /* Adds subtle shadow to charts */
-    border-radius: 8px; /* Rounded corners for chart containers */
-}
-
+/* Navigation Styles */
 .nav {
     background-color: #135D66; /* Secondary dark color for navbar */
     color: #ffffff;
     padding: 10px;
     text-align: center;
+    margin-bottom: 20px; /* Space below navbar */
 }
 
 .nav a {
@@ -70,5 +79,44 @@ th {
 }
 
 .nav a:hover {
-    background-color: #003C43;
+    background-color: #003C43; /* Dark teal for hover */
+    border-radius: 5px; /* Rounded corners for links */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    table {
+        width: 95%;
+    }
+
+    .chart-container {
+        flex-direction: column; /* Stacks the charts vertically on smaller screens */
+    }
+
+    .nav, .nav a {
+        display: block;
+        text-align: center;
+    }
+}
+.tooltip {
+    visibility: hidden; /* Start hidden */
+    width: 120px;
+    background-color: black;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 100%; /* Position above the bar */
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 5px; /* Give some space between the tooltip and the bar */
+    opacity: 0;
+    transition: visibility 0s, opacity 0.5s linear;
+}
+
+.bar:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
 }

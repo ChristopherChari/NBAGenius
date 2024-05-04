@@ -189,8 +189,8 @@ def advanced_stats_player_percentile(player_id):
             player_data = next((item for item in players_data if item['PLAYER_ID'] == player_id), None)
             
             if player_data:
-                ts = player_data['TS_PCT'] * 100  # Assuming TS% is provided like this
-                ast = player_data['AST_PCT'] * 100  # Assuming AST% is provided like this
+                ts = round(player_data['TS_PCT'] * 100, 1)  # Assuming TS% is provided like this
+                ast = round(player_data['AST_PCT'] * 100,1)  # Assuming AST% is provided like this
 
                 ts_sorted = sorted([p['TS_PCT'] * 100 for p in players_data])
                 ast_sorted = sorted([p['AST_PCT'] * 100 for p in players_data])

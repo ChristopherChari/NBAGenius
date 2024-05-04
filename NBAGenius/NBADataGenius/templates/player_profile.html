@@ -26,7 +26,7 @@
         .chart-container {
             display: flex;
         }
-
+gi
         .chart-container > div {
             margin-right: 20px;
             height: 300px;
@@ -240,7 +240,7 @@
     </head>
     <body>
         <h1>Player Statistics and Percentiles</h1>
-        <table>
+        <table id="percentileTable">
             <thead>
                 <tr>
                     <th class="stat-col">Stat</th>
@@ -302,7 +302,7 @@
     
                 {% if advanced_data %}
                     <tr>
-                        <td class="stat-col">True Shooting %</td>
+                        <td class="stat-col">TS%</td>
                         <td>{{ advanced_data.player_ts }}%</td>
                         <td>
                             <div class="bar-container">
@@ -311,8 +311,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="stat-col">Assist %</td>
-                        <td>{{ advanced_percentile_data.player_ast }}%</td>
+                        <td class="stat-col">AST%</td>
+                        <td>{{ advanced_data.player_ast }}%</td>
                         <td>
                             <div class="bar-container">
                                 <div class="bar" style="width: {{ advanced_data.ast_percentile }}%;"></div>
@@ -320,20 +320,44 @@
                         </td>
                     </tr>
                 {% endif %}
-                {% if hustle_data %}
-                    {% for key, value in hustle_data.items %}
-                        <tr>
-                            <td>{{ key }}</td>
-                            <td>{{ value.value }}</td>
-                            <td>
-                                <div class="bar-container">
-                                    <div class="bar" style="width: {{ value.percentile }}%;"></div>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% endif %}
+                {% load my_custom_filters %}
+                {% for key, value in hustle_data.items %}
+                    <tr>
+                        <td>{{ key|format_stat }}</td>
+                        <td>{{ value.value }}</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ value.percentile }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                
             </tbody>
         </table>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const bars = document.querySelectorAll('#percentileTable .bar');
+            
+                bars.forEach(bar => {
+                    const widthPercentage = bar.style.width;
+                    const percentile = parseFloat(widthPercentage);
+                    // Set colors based on percentile
+                    if (percentile > 75) {
+                        bar.style.backgroundColor = '#4CAF50'; // Green for high percentiles
+                    } else if (percentile > 50) {
+                        bar.style.backgroundColor = '#FFC107'; // Orange for middle percentiles
+                    } else {
+                        bar.style.backgroundColor = '#F44336'; // Red for low percentiles
+                    }
+            
+                    // Create and append the tooltip
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'tooltip';
+                    tooltip.textContent = `Percentile: ${percentile.toFixed(1)}%`;
+                    bar.appendChild(tooltip);
+                });
+            });       
+        </script>
     </body>
         </div>
