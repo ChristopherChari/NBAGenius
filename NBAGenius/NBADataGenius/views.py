@@ -6,16 +6,15 @@ from nba_api.stats.endpoints import commonplayerinfo
 import requests
 from django.shortcuts import render
 from django.template import TemplateDoesNotExist
-from .models import Player  # Assuming you have a Player model defined
 from .models import Player, CommonPlayerInfo  # Assuming you have a Player model defined
-from django.shortcuts import render
 from nba_api.stats.static import players as nba_players
-from nba_api.stats.endpoints import PlayerDashboardByYearOverYear, LeagueDashPlayerStats, LeagueDashPtStats
+from nba_api.stats.endpoints import PlayerDashboardByYearOverYear, LeagueDashPlayerStats, LeagueDashPtStats, LeagueDashPtDefend
 from nba_api.stats.endpoints.playercareerstats import PlayerCareerStats
 from nba_api.stats.endpoints.matchupsrollup import MatchupsRollup
 from nba_api.stats.endpoints import commonallplayers
 from nba_api.stats import endpoints
 from nba_api.stats.endpoints import SynergyPlayTypes, leaguedashplayerstats, LeagueHustleStatsPlayer
+from nba_api.stats.endpoints import leaguedashptdefend
 import pandas as pd
 import numpy as np
 import json
@@ -230,6 +229,61 @@ def get_league_advanced_stats_player(player_id):
     except Exception as e:
         print(f"Error retrieving advanced league stats for player {player_id}: {str(e)}")
         return []
+    
+def format_stat_name(name):
+    return ' '.join(word.capitalize() for word in name.split('_'))
+
+
+import numpy as np
+from nba_api.stats.endpoints import leaguedashptdefend
+
+def calculate_defensive_metrics(player_id):
+    try:
+        response = leaguedashptdefend.LeagueDashPtDefend(
+            per_mode_simple='PerGame',
+            defense_category='Less Than 6Ft',
+            league_id='00',
+            season_type_all_star='Regular Season'
+        )
+
+        defense_data = response.get_normalized_dict()
+        players_data = defense_data['LeagueDashPTDefend']
+
+        # Extracting data ensuring no null values are processed
+        freq_list = [float(player['FREQ']) for player in players_data if 'FREQ' in player and player['FREQ'] is not None]
+        d_fg_pct_list = [float(player['PLUSMINUS']) for player in players_data if 'PLUSMINUS' in player and player['PLUSMINUS'] is not None]
+
+        # Convert all values to percentage
+        freq_list_percent = [x * 100 for x in freq_list]
+        d_fg_pct_list_percent = [x * 100 for x in d_fg_pct_list]
+
+        player_data = next((item for item in players_data if item['CLOSE_DEF_PERSON_ID'] == player_id), None)
+
+        if player_data:
+            player_freq = round(float(player_data['FREQ']) * 100, 1)
+            player_d_fg_pct = round(float(player_data['PLUSMINUS']) * 100, 1)
+
+            # Calculate percentiles using sorted lists and searchsorted
+            freq_percentile = round((np.searchsorted(sorted(freq_list_percent), player_freq) / len(freq_list_percent)) * 100, 1)
+            d_fg_pct_percentile = round((np.searchsorted(sorted(d_fg_pct_list_percent), player_d_fg_pct) / len(d_fg_pct_list_percent)) * 100, 1)
+
+            result = {
+                'Rim_Frequency': player_freq,
+                'Rim_Defense': player_d_fg_pct,
+                'freq_percentile': freq_percentile,
+                'd_fg_pct_percentile': d_fg_pct_percentile
+            }
+            print("Defensive metrics calculated:", result)
+            return result
+        else:
+            print(f"Player with ID {player_id} not found in defensive stats.")
+            return None
+
+    except Exception as e:
+        print(f"Error in calculate_defensive_metrics: {e}")
+        return None
+
+
 
 def get_league_hustle_stats_player(player_id):
     try:
@@ -265,6 +319,7 @@ def get_league_hustle_stats_player(player_id):
                         'value': value,
                         'percentile': percentiles[key]
                     }
+            
             return hustle_data
         else:
             print("Player not found in the data.")
@@ -305,15 +360,9 @@ def player_profile(request, player_id):
     try:
         # Retrieve player information from the NBA API
         player_info = commonplayerinfo.CommonPlayerInfo(player_id=player_id)
-
-        # Retrieve player career stats from the NBA API with measure type set to 'Advanced'
         player_dashboard = PlayerDashboardByYearOverYear(per_mode_detailed='PerGame', player_id=player_id)
         player_dashboard_advanced = PlayerDashboardByYearOverYear(player_id=player_id, measure_type_detailed='Advanced')
-
-        # Retrieve matchup rollups to see the percentage of time a player guards a position
         matchup_rollups = MatchupsRollup(def_player_id_nullable=player_id)
-
-        # Get synergy playtype data for the specific player
         synergy_data = get_synergy_playtype_data(player_id)
         hustle_data = get_league_hustle_stats_player(player_id)
         advanced_league_data = get_league_advanced_stats_player(player_id)
@@ -321,8 +370,8 @@ def player_profile(request, player_id):
         basic_league_data = get_league_stats_player(player_id)
         player_rate_data = calculate_player_rates(player_id)
         effiency_data = calculate_player_efficiency(player_id)
-      
-        
+        defensive_data = calculate_defensive_metrics(player_id) # Check output in the console
+
 
 
 
@@ -331,6 +380,7 @@ def player_profile(request, player_id):
         player_dashboard_dict = player_dashboard.get_normalized_dict()
         player_dashboard_advanced_dict = player_dashboard_advanced.get_normalized_dict()
         matchup_rollups_dict = matchup_rollups.get_normalized_dict()
+
 
         # Check if player data is found
         if player_info_dict and 'CommonPlayerInfo' in player_info_dict:
@@ -380,7 +430,8 @@ def player_profile(request, player_id):
                 'synergy_data': synergy_data,
                 'hustle_data' : hustle_data,
                 'advanced_data': advanced_percentile_data,
-                'efficieny_data': effiency_data
+                'efficieny_data': effiency_data,
+                'defensive_data' : defensive_data
                 
             }
             return render(request, 'player_profile.html', context)
