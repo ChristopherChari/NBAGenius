@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import requests
 from pandas import DataFrame
 from nba_api.stats.endpoints import commonplayerinfo
+from django.http import JsonResponse
+from nba_api.stats.static import players as nba_players
 import requests
 from django.shortcuts import render
 from django.template import TemplateDoesNotExist
@@ -24,24 +26,27 @@ def home(request):
     return render(request, "home.html")
 
 def player_list(request):
-    # Retrieve all NBA players using nba_api
+    search_query = request.GET.get('search', '').strip()
     all_nba_players = nba_players.get_players()
 
-    # Process player data
-    players = []
-    for player in all_nba_players:
-        # Assuming 'is_active' is not available directly from nba_api
-        # You can add additional fields if needed
-        players.append({
+    # Filter active players if the search query is provided
+    filtered_players = [
+        player for player in all_nba_players
+        if search_query.lower() in player['full_name'].lower() and player['is_active']
+    ]
+
+    # If this is an AJAX request, only return JSON data
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        players_data = [{
             'id': player['id'],
             'full_name': player['full_name'],
-            'status': 'Active' if player['is_active'] else 'Inactive'
-        })
+            'image_url': f"https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{player['id']}.png"
+        } for player in filtered_players]
+        return JsonResponse({'players': players_data})
 
-    context = {
-        'players': players
-    }
-
+    # Otherwise, return full page with context
+    players = [{'id': player['id'], 'full_name': player['full_name'], 'status': 'Active'} for player in filtered_players]
+    context = {'players': players}
     return render(request, 'player_list.html', context)
 
 def calculate_player_rates(player_id):
@@ -141,7 +146,6 @@ def calculate_rebound_and_defense_stats(player_id):
                     percentile = (percentile_index / len(sorted_list)) * 100
                     player_data[f"{stat}_percentile"] = round(percentile, 1)
 
-        print(player_data)  # Debugging output to check computed values
         return player_data
 
     except Exception as e:

@@ -253,150 +253,148 @@
                     <th>Percentile</th>
                 </tr>
             </thead>
-            <tbody>
-                    {% if player_rate_data %}
-                    <tr>
-                        <td class="stat-col">FTAR</td>
-                        <td>{{ player_rate_data.FTAR }}%</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ player_rate_data.FTAR_percentile }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="stat-col">3PAR</td>
-                        <td>{{ player_rate_data.3PAR }}%</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ player_rate_data.3PAR_percentile }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endif %}
-                    {% if rebound_defense_data %}
-                    <tr>
-                        <td class="stat-col">OREB</td>
-                        <td>{{ rebound_defense_data.OREB}}</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ rebound_defense_data.OREB_percentile }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="stat-col">DREB</td>
-                        <td>{{ rebound_defense_data.DREB }}</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ rebound_defense_data.DREB_percentile }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="stat-col">BLK</td>
-                        <td>{{ rebound_defense_data.BLK }}</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ rebound_defense_data.BLK_percentile }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="stat-col">STL</td>
-                        <td>{{ rebound_defense_data.STL }}</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ rebound_defense_data.STL_percentile}}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                {% endif %}
-                {% if efficieny_data %}
-                    <tr>
-                        <td class="stat-col">Drive PTS</td>
-                        <td>{{ efficieny_data.Drive_points }}</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ efficieny_data.Drive_percentile }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="stat-col">Catch and Shoot PTS</td>
-                        <td>{{ efficieny_data.Shoot_points }}</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ efficieny_data.CNS_percentile }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="stat-col">Pull Up PTS</td>
-                        <td>{{ efficieny_data.pull_up_points }}</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ efficieny_data.pull_up_percentile }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                {% endif %}
-    
-                {% if advanced_data %}
-                    <tr>
-                        <td class="stat-col">TS%</td>
-                        <td>{{ advanced_data.player_ts }}%</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ advanced_data.ts_percentile }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="stat-col">AST%</td>
-                        <td>{{ advanced_data.player_ast }}%</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ advanced_data.ast_percentile }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                {% endif %}
-                {% load my_custom_filters %}
-                {% for key, value in hustle_data.items %}
-                    <tr>
-                        <td>{{ key|format_stat }}</td>
-                        <td>{{ value.value }}</td>
-                        <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {{ value.percentile }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-                {% if defensive_data %}
+        <tbody>
+                {% if player_rate_data %}
                 <tr>
-                    <td class="stat-col">Rim Frequency</td>
-                    <td>{{ defensive_data.Rim_Frequency }}%</td>
+                    <td class="stat-col">FTAR</td>
+                    <td>{{ player_rate_data.FTAR }}%</td>
                     <td>
                         <div class="bar-container">
-                            <div class="bar" style="width: {{ defensive_data.freq_percentile }}%;"></div>
+                            <div class="bar" style="width: {{ player_rate_data.FTAR_percentile }}%;"></div>
                         </div>
                     </td>
                 </tr>
                 <tr>
-                    <td class="stat-cool">Rim Defense</td>
-                    <td>{{ defensive_data.Rim_Defense }}</td>
+                    <td class="stat-col">3PAR</td>
+                    <td>{{ player_rate_data.3PAR }}%</td>
                     <td>
                         <div class="bar-container">
-                            <div class="bar" style="width: {{ defensive_data.d_fg_pct_percentile }}%;"></div>
+                            <div class="bar" style="width: {{ player_rate_data.3PAR_percentile }}%;"></div>
                         </div>
                     </td>
                 </tr>
                 {% endif %}
+                {% if rebound_defense_data %}
+                <tr>
+                    <td class="stat-col">OREB</td>
+                    <td>{{ rebound_defense_data.OREB}}</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: {{ rebound_defense_data.OREB_percentile }}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stat-col">DREB</td>
+                    <td>{{ rebound_defense_data.DREB }}</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: {{ rebound_defense_data.DREB_percentile }}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stat-col">BLK</td>
+                    <td>{{ rebound_defense_data.BLK }}</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: {{ rebound_defense_data.BLK_percentile }}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stat-col">STL</td>
+                    <td>{{ rebound_defense_data.STL }}</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: {{ rebound_defense_data.STL_percentile}}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
+            {% if efficieny_data %}
+                <tr>
+                    <td class="stat-col">Drive PTS</td>
+                    <td>{{ efficieny_data.Drive_points }}</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: {{ efficieny_data.Drive_percentile }}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stat-col">Catch and Shoot PTS</td>
+                    <td>{{ efficieny_data.Shoot_points }}</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: {{ efficieny_data.CNS_percentile }}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stat-col">Pull Up PTS</td>
+                    <td>{{ efficieny_data.pull_up_points }}</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: {{ efficieny_data.pull_up_percentile }}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
 
-
-            </tbody>
+            {% if advanced_data %}
+                <tr>
+                    <td class="stat-col">TS%</td>
+                    <td>{{ advanced_data.player_ts }}%</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: {{ advanced_data.ts_percentile }}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stat-col">AST%</td>
+                    <td>{{ advanced_data.player_ast }}%</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: {{ advanced_data.ast_percentile }}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
+            {% load my_custom_filters %}
+            {% for key, value in hustle_data.items %}
+                <tr>
+                    <td>{{ key|format_stat }}</td>
+                    <td>{{ value.value }}</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: {{ value.percentile }}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            {% if defensive_data %}
+            <tr>
+                <td class="stat-col">Rim Frequency</td>
+                <td>{{ defensive_data.Rim_Frequency }}%</td>
+                <td>
+                    <div class="bar-container">
+                        <div class="bar" style="width: {{ defensive_data.freq_percentile }}%;"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="stat-cool">Rim Defense</td>
+                <td>{{ defensive_data.Rim_Defense }}</td>
+                <td>
+                    <div class="bar-container">
+                        <div class="bar" style="width: {{ defensive_data.d_fg_pct_percentile }}%;"></div>
+                    </div>
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
         </table>
         <script>
             document.addEventListener('DOMContentLoaded', function () {

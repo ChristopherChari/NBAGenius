@@ -1,5 +1,3 @@
-<!-- player_list.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,15 +5,109 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Player List</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            background-color: #003C43;
+            color: #E3FEF7;
+            font-family: Arial, sans-serif;
+        }
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* Creates five columns */
+            gap: 10px; /* Space between grid items */
+            padding: 20px;
+        }
+        .player-item {
+            background-color: #E3FEF7;
+            color: #003C43;
+            text-align: center; /* Center align text */
+            margin-bottom: 20px; /* Space below each item */
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .player-item img {
+            width: 100%; /* Make images responsive */
+            max-width: 150px; /* Maximum width of images */
+            height: auto; /* Maintain aspect ratio */
+            margin-bottom: 10px; /* Space between image and text */
+        }
+        .player-item a {
+            color: #135D66;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .player-item a:hover {
+            color: #77B0AA;
+        }
+        .search-bar {
+            margin: 20px;
+            text-align: center;
+        }
+        input[type="text"], button {
+            padding: 10px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        input[type="text"] {
+            background-color: #E3FEF7;
+            color: #003C43;
+        }
+        button {
+            background-color: #135D66;
+            color: #E3FEF7;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #77B0AA;
+        }
+    </style>
 </head>
 <body>
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search players...">
+        <button type="button">Search</button>
+    </div>
     <h1>Player List</h1>
-    <ul>
+    <div class="player-grid" id="player-grid">
         {% for player in players %}
-            <li>
-                <a href="{% url 'player_profile' player_id=player.id %}">{{ player.full_name }}</a> - {{ player.status }}
-            </li>
+        <div class="player-item">
+            <img src="https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{{ player.id }}.png" alt="{{ player.full_name }}">
+            <a href="{% url 'player_profile' player_id=player.id %}">{{ player.full_name }}</a>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#search-input').keyup(function() {
+                const searchText = $(this).val();
+                $.ajax({
+                    url: '{% url "players_list" %}',
+                    data: { 'search': searchText },
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        let newContent = '';
+                        data.players.forEach(function(player) {
+                            // Directly construct the URL here instead of trying to use Django template syntax
+                            let profileUrl = `/players/${player.id}/`; // Make sure this pattern matches your URL configuration in Django
+                            newContent += `
+                                <div class="player-item">
+                                    <a href="${profileUrl}">
+                                        <img src="https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/${player.id}.png" alt="${player.full_name}">
+                                        <p>${player.full_name}</p>
+                                    </a>
+                                </div>`;
+                        });
+                        $('#player-grid').html(newContent);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
