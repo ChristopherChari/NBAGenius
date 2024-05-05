@@ -55,6 +55,7 @@
                     <p>Height: {{ player.HEIGHT }}</p>
                     <p>Weight: {{ player.WEIGHT }}</p>
                     <p>Team: {{ player.TEAM_NAME }}</p>
+                    <p>Age: {{ defensive_data.age }}
                 </div>
                 <div class="player-stats">
                     {% if player_stats %}
@@ -253,7 +254,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% if player_rate_data %}
+                    {% if player_rate_data %}
                     <tr>
                         <td class="stat-col">FTAR</td>
                         <td>{{ player_rate_data.FTAR }}%</td>
@@ -272,8 +273,45 @@
                             </div>
                         </td>
                     </tr>
+                    {% endif %}
+                    {% if rebound_defense_data %}
+                    <tr>
+                        <td class="stat-col">OREB</td>
+                        <td>{{ rebound_defense_data.OREB}}</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ rebound_defense_data.OREB_percentile }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="stat-col">DREB</td>
+                        <td>{{ rebound_defense_data.DREB }}</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ rebound_defense_data.DREB_percentile }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="stat-col">BLK</td>
+                        <td>{{ rebound_defense_data.BLK }}</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ rebound_defense_data.BLK_percentile }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="stat-col">STL</td>
+                        <td>{{ rebound_defense_data.STL }}</td>
+                        <td>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {{ rebound_defense_data.STL_percentile}}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
                 {% endif %}
-    
                 {% if efficieny_data %}
                     <tr>
                         <td class="stat-col">Drive PTS</td>

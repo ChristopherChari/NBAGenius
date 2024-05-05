@@ -99,6 +99,54 @@ def calculate_player_rates(player_id):
         print(f"Error calculating player rates and percentiles: {e}")
         return None
 
+def calculate_rebound_and_defense_stats(player_id):
+    try:
+        # Fetch data from the LeagueDashPlayerStats endpoint
+        player_stats = LeagueDashPlayerStats(per_mode_detailed='PerGame', measure_type_detailed_defense='Base')
+        player_stats_data = player_stats.get_normalized_dict()['LeagueDashPlayerStats']
+
+        # Initialize lists for each statistic for percentile calculation
+        oreb_list, dreb_list, blk_list, stl_list = [], [], [], []
+        player_data = {}
+
+        # Collect stats from all players and identify the target player's stats
+        for player_stat in player_stats_data:
+            oreb = player_stat.get('OREB', 0)
+            dreb = player_stat.get('DREB', 0)
+            blk = player_stat.get('BLK', 0)
+            stl = player_stat.get('STL', 0)
+
+            # Append data to lists
+            oreb_list.append(oreb)
+            dreb_list.append(dreb)
+            blk_list.append(blk)
+            stl_list.append(stl)
+
+            # Check if the current data belongs to the target player
+            if player_stat['PLAYER_ID'] == player_id:
+                player_data = {
+                    'OREB': oreb,
+                    'DREB': dreb,
+                    'BLK': blk,
+                    'STL': stl
+                }
+
+        # Calculate percentiles for the retrieved player stats
+        for stat in ['OREB', 'DREB', 'BLK', 'STL']:
+            stat_list = locals()[f"{stat.lower()}_list"]
+            if stat_list:
+                sorted_list = sorted(stat_list)
+                if player_data.get(stat) is not None:
+                    percentile_index = np.searchsorted(sorted_list, player_data[stat], side="right")
+                    percentile = (percentile_index / len(sorted_list)) * 100
+                    player_data[f"{stat}_percentile"] = round(percentile, 1)
+
+        print(player_data)  # Debugging output to check computed values
+        return player_data
+
+    except Exception as e:
+        print(f"Error calculating rebound and defense stats: {e}")
+        return None
 
 def calculate_player_efficiency(player_id):
     try:
@@ -262,18 +310,19 @@ def calculate_defensive_metrics(player_id):
         if player_data:
             player_freq = round(float(player_data['FREQ']) * 100, 1)
             player_d_fg_pct = round(float(player_data['PLUSMINUS']) * 100, 1)
+            player_age = int(round(player_data['AGE'], 0))
 
             # Calculate percentiles using sorted lists and searchsorted
             freq_percentile = round((np.searchsorted(sorted(freq_list_percent), player_freq) / len(freq_list_percent)) * 100, 1)
-            d_fg_pct_percentile = round((np.searchsorted(sorted(d_fg_pct_list_percent), player_d_fg_pct) / len(d_fg_pct_list_percent)) * 100, 1)
+            d_fg_pct_percentile = 100 - round((np.searchsorted(sorted(d_fg_pct_list_percent), player_d_fg_pct) / len(d_fg_pct_list_percent)) * 100, 1)
 
             result = {
                 'Rim_Frequency': player_freq,
                 'Rim_Defense': player_d_fg_pct,
                 'freq_percentile': freq_percentile,
-                'd_fg_pct_percentile': d_fg_pct_percentile
+                'd_fg_pct_percentile': d_fg_pct_percentile,
+                'age' : player_age
             }
-            print("Defensive metrics calculated:", result)
             return result
         else:
             print(f"Player with ID {player_id} not found in defensive stats.")
@@ -371,6 +420,7 @@ def player_profile(request, player_id):
         player_rate_data = calculate_player_rates(player_id)
         effiency_data = calculate_player_efficiency(player_id)
         defensive_data = calculate_defensive_metrics(player_id) # Check output in the console
+        player_randd_data = calculate_rebound_and_defense_stats(player_id)
 
 
 
@@ -431,8 +481,8 @@ def player_profile(request, player_id):
                 'hustle_data' : hustle_data,
                 'advanced_data': advanced_percentile_data,
                 'efficieny_data': effiency_data,
-                'defensive_data' : defensive_data
-                
+                'defensive_data' : defensive_data,
+                'rebound_defense_data' : player_randd_data
             }
             return render(request, 'player_profile.html', context)
         else:
