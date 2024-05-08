@@ -286,8 +286,6 @@ def format_stat_name(name):
     return ' '.join(word.capitalize() for word in name.split('_'))
 
 
-import numpy as np
-from nba_api.stats.endpoints import leaguedashptdefend
 
 def calculate_defensive_metrics(player_id):
     try:
@@ -408,7 +406,7 @@ def get_synergy_playtype_data(player_id):
     except Exception as e:
         print(f"Error retrieving synergy playtype data for player ID {player_id}: {e}")
         return None
-
+    
 def player_profile(request, player_id):
     try:
         # Retrieve player information from the NBA API

@@ -4,11 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NBA Genius Home</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #003C43; /* Lightest color for the background */
+            color: #E3FEF7; /* Darkest color for text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full viewport height */
+        }
+
+        .content {
+            text-align: center;
+        }
+
+        h1 {
+            color: #135D66; /* Secondary dark color for main heading */
+            font-size: 48px; /* Large size for impact */
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #E3FEF7; /* Main text color */
+            font-size: 20px; /* Readable text size */
+            margin: 10px 0; /* Proper spacing between elements */
+        }
+
+        .link {
+            display: inline-block;
+            background-color: #135D66;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .link:hover {
+            background-color: #E3FEF7; /* Dark teal for hover */
+        }
+    </style>
 </head>
 <body>
-    <h1>{{ welcome_message }}</h1>
-    <!-- Add a hyperlink to the players list -->
-    <p><a href="{% url 'players_list' %}">View Players List</a></p>
-    <!-- Add any other HTML content for your home page -->
+    <div class="content">
+        <h1>NBA Genius</h1>
+        <p>Welcome to NBA Genius, your go-to source for NBA stats and analytics.</p>
+        <p><a href="{% url 'players_list' %}" class="link">View Players List</a></p>
+    </div>
 </body>
 </html>

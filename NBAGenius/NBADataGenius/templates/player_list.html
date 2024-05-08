@@ -12,7 +12,23 @@
         body {
             background-color: #003C43;
             color: #E3FEF7;
-            font-family: Arial, sans-serif;
+            font-family: Inter, sans-serif;
+        }
+        .breadcrumb {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 0.9em;
+            background: #f2f2f2;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .breadcrumb a {
+            color: #135D66;
+            text-decoration: none;
+        }
+        .breadcrumb span {
+            color: #003C43;
         }
         .player-grid {
             display: grid;
@@ -67,6 +83,10 @@
         }
     </style>
 </head>
+<body>
+    <div class="breadcrumb">
+        <a href="{% url 'home' %}">Home</a> → <a href="{% url 'players_list' %}">Player List</a> → <span>{{ player.FIRST_NAME }} {{ player.LAST_NAME }}</span>
+    </div>
 <body>
     <div class="search-bar">
         <input type="text" id="search-input" placeholder="Search players...">

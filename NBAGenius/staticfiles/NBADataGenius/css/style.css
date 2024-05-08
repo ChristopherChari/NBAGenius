@@ -101,7 +101,7 @@ tr:hover {
 .tooltip {
     visibility: hidden; /* Start hidden */
     width: 120px;
-    background-color: black;
+    background-color: rgba(0, 0, 0, 0.376);
     color: white;
     text-align: center;
     border-radius: 6px;
